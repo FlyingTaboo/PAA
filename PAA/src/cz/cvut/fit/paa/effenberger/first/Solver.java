@@ -4,6 +4,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 public class Solver {
 	private static final int MAX_VALUE = 2;
@@ -275,62 +277,86 @@ public class Solver {
 		return result;
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
 	public Result findCoolingResult(){
 		Instant start = Instant.now();
 		Result result = new Result(ID, size, capacity);
 		double aktualniTeplota = (this.pocatecniTeplota * this.capacity) / Math.log(2);
-		
+		int aktualniCena = 0;
+		int bestCena = 0;
+		int bestCenaVaha = 0;
+		int expandovano = 0;
 		
 		int i = 0;
-		while( !isFrozen(aktualniTeplota)); {
+		ArrayList<Integer> novy = new ArrayList<Integer>();
+		ArrayList<Integer> aktualni = new ArrayList<Integer>();
+		for(int j=0; j<size; j++){
+			aktualni.add(1);
+			if(getWeightOfContent(aktualni) > capacity){
+				aktualni.set(j, 0);
+				break;
+			}
+		}
+		for(int j=aktualni.size(); j<size; j++){
+			aktualni.add(0);
+		}
+		
+		while( !isFrozen(aktualniTeplota)){
 			i = 0;
 			while(equilibrum(i)) {
 				i++;
-				
-                novyStav = getNextState(aktualniStav, polozky);
-
-                batoh.clear();
-                /* naplnime batoh */
-                fillBatoh(polozky, novyStav);
-                /* mrkneme kolik se podarilo ukradnout a pokud je to nejlepsi vysledek, tak ulozime */
-                aktualniCena = this.batoh.getAktualniCena();
-                if ( isBetter(aktualniCena) ) {
-                    // System.out.println("Nasli jsme lepsi reseni s cenou " + aktualniCena + " a vahou " + this.batoh.getAktualniZatizeni());
-                    this.bestCena = aktualniCena;
-                    this.bestCenaVaha = this.batoh.getAktualniZatizeni();
-                    this.bestPolozky = this.batoh.getPolozky();
+				expandovano++; 
+				novy = generateNextState(aktualni);
+                aktualniCena = getPriceOfContent(novy);
+                if (aktualniCena > bestCena ) {
+                    bestCena = aktualniCena;
+                    bestCenaVaha = getWeightOfContent(novy);
+                    content = novy;
+                    //System.out.println("added new result" + content + getPriceOfContent(content) + " " + getWeightOfContent(content));
+                    result.addResult(content, getPriceOfContent(content), getWeightOfContent(content));
                 }
 			}
 			aktualniTeplota = zchladit(aktualniTeplota);
 		} 
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 		Instant end = Instant.now();
 		result.setDuration(Duration.between(start, end));
+		result.setExpandovano(expandovano);
 		return result;
 	}
 	
-	
-	
-	
-	
+	private ArrayList<Integer> generateNextState(ArrayList<Integer> aktualni) {
+        int cena1 = getPriceOfContent(aktualni);
+
+        ArrayList<Integer> novy = getRandomState(aktualni);
+        int cena2 = getPriceOfContent(novy);
+
+        if ( cena2 > cena1 ) {
+            return novy;
+            
+        } else {
+            int delta = cena2 - cena1;
+            Random randomObj = new Random();
+            double x = randomObj.nextDouble();
+            return ( x < Math.exp(-delta / this.koeficientOchlazeni) ) ? novy : aktualni;
+        }
+    }
+
+	private ArrayList<Integer> getRandomState(ArrayList<Integer> aktualni) {
+		ArrayList<Integer> novy = (ArrayList<Integer>) aktualni.clone();
+		
+        Random index = new Random();
+        int random = index.nextInt(novy.size());
+        novy.set(random, novy.get(random) == 0 ? 1 : 0);
+        for(int i=novy.size()-1; i>=0; i--){
+        	if(getWeightOfContent(novy)>capacity){
+        		novy.set(i, 0);
+        	}else{
+        		break;
+        	}
+        }
+        //System.out.println(novy);
+        return novy;
+	}
+
 	private boolean isFrozen(double aktualniTeplota) {
 	    return aktualniTeplota < this.minimalniTeplota;
 	}
@@ -339,10 +365,9 @@ public class Solver {
 		 return (aktualniTeplota * this.koeficientOchlazeni);
 	}
 
-	public void setCoolingAttributes(double pocatecniTeplota, double koeficientOchlazeni, int teplotaTuhnuti, double minimalniTeplota, double koeficientEquilibrum){
+	public void setCoolingAttributes(double pocatecniTeplota, double koeficientOchlazeni, double minimalniTeplota, double koeficientEquilibrum){
 		this.pocatecniTeplota = pocatecniTeplota;
 		this.koeficientOchlazeni = koeficientOchlazeni;
-		this.teplotaTuhnuti = teplotaTuhnuti;
 		this.minimalniTeplota = minimalniTeplota;
 		this.koeficientEquilibrum = koeficientEquilibrum;
 	}

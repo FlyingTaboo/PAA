@@ -12,6 +12,7 @@ public class Result {
 	private Duration duration;
 	private ArrayList<ArrayList<Integer>> result;
 	private double epsilon;
+	private int setExpandovano;
 	
 	@Override
 	public String toString() {
@@ -94,6 +95,14 @@ public class Result {
 	
 	public int getTotalIntPrice() {
 		return new Float(this.priceOfResult).intValue();
+	}
+
+	public void setExpandovano(int expandovano) {
+		this.setExpandovano= expandovano;
+		
+	}
+	public int getExpandovano(){
+		return this.setExpandovano;
 	}
 	
 	

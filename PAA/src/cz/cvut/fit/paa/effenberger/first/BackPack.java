@@ -12,7 +12,7 @@ public class BackPack {
 	private static ArrayList<File> files = new ArrayList<File>();
 
 	public static void main(String[] args) throws Exception {
-		readFiles(new File("D:\\GDRIVE\\FIT\\test\\all.inst.dat"));
+		readFiles(new File("D:\\GDRIVE\\FIT\\test\\knap_40.inst.dat"));
 		for (int i = 0; i < files.size(); i++) {
 			readFileAndSolve(files.get(i));
 		}
@@ -33,87 +33,31 @@ public class BackPack {
 		
 		
 		Result resultDynamic = null;
-		Result resultFPTAS = null;
-		Result resultBF = null;
-		Result resultHeur = null;
-		Instant startDyn = Instant.now();
-		for(int i=0;i<1000;i++){
-			Solver solverDyn = new Solver(ID, resultSize, max_weight, items, 0.0);
-			resultDynamic = solverDyn.findDynamicResult(false);
-		}
-		Instant endDyn = Instant.now();
+		Solver solverDyn = new Solver(ID, resultSize, max_weight, items, 0.0);
+		resultDynamic = solverDyn.findDynamicResult(false);
 		
 		
-		int max = resultSize;
-		if (resultSize == 5) max = 1000;
-		if (resultSize == 7) max = 1000;
-		if (resultSize == 10) max = 100;
-		if (resultSize == 12) max = 100;
-		if (resultSize == 15) max = 10;
-		if (resultSize == 17) max = 1;
-		if (resultSize == 20) max = 1;
-		Instant startBF = Instant.now();
-		for(int i=0;i<max; i++){
-			Solver solverBF = new Solver(ID, resultSize, max_weight, items, 0.0);
-			resultBF = solverBF.findExactResult();
-		}
-		Instant endBF = Instant.now();
+		Result resultSC = null;
+		Solver solverSC = new Solver(ID, resultSize, max_weight, items, 0.0);
+		double pocatecniTeplota = 500;
+		double koeficientOchlazeni = 0.85;
+		double minimalniTeplota = 1;
+		double koeficientEquilibrum = 2;
 		
-		Instant startBandB = Instant.now();
-		for(int i=0;i<max; i++){
-			Solver solverBandB = new Solver(ID, resultSize, max_weight, items, 0.0);
-			solverBandB.findBandBResult();
-		}
-		Instant endBandB = Instant.now();
+		Instant startSC = Instant.now();
+		solverSC.setCoolingAttributes(pocatecniTeplota, koeficientOchlazeni, minimalniTeplota, koeficientEquilibrum);
 		
-		Instant startHeur = Instant.now();
-		for(int i=0;i<10000; i++){
-			Solver solverHeur = new Solver(ID, resultSize, max_weight, items, 0.0);
-			resultHeur = solverHeur.findHeuristicResult();
-		}
-		Instant endHeur = Instant.now();
-		
+		resultSC = solverSC.findCoolingResult();
+		Instant endSC = Instant.now();
+			
 		String out = resultSize + ";\t" + ID + ";\t";
-		//out+= resultDynamic.getTotalPrice() + ";";
-		out+= ((double) Duration.between(startDyn, endDyn).toMillis())/1000 + ";\t";
-		out+= ((double) Duration.between(startBF, endBF).toMillis())/max + ";\t";
-		out+= ((double) Duration.between(startBandB, endBandB).toMillis())/max + ";\t";
-		out+= ((double) Duration.between(startHeur, endHeur).toMillis())/10000.0 + ";\t\t";
-		out+= (resultDynamic.getTotalPrice() - resultHeur.getTotalPrice())/resultDynamic.getTotalPrice();
+		out+= (resultDynamic.getTotalPrice() - resultSC.getTotalPrice())/resultDynamic.getTotalPrice() + ";\t";
+		//out += resultDynamic.getTotalPrice() + " vs " + resultSC.getTotalPrice() + ";\t";
+		out += Duration.between(startSC, endSC).toMillis() + ";\t";
+		out += resultSC.getExpandovano();
 		
-		
-		/*
-		for(int j=1; j<11; j++){
-			Instant startFPTAS = Instant.now();
-			for(int i=0;i<100;i++){
-				Solver solverFPTAS = new Solver(ID, resultSize, max_weight, items, 0.1*j);
-				resultFPTAS = solverFPTAS.findFPTASResult();
-			}
-			Instant endFPTAS = Instant.now();
-			out+=";";
-			out+= resultFPTAS.getTotalPrice() + ";";
-			out+= Duration.between(startFPTAS, endFPTAS).toMillis();
-			out+=";";
-			out+=(resultDynamic.getTotalPrice()-resultFPTAS.getTotalPrice())/resultFPTAS.getTotalPrice();
-			out+=";";
-		}
-		*/
-		
-		//out+= c.toString() + "; ";
-		//out+= d.toString();
 		
 		System.out.println(out);
- 		
-		
-		/*Result heuristic = null;
-		Instant start1 = Instant.now();
-		heuristic = solver.findHeuristicResult();
-
-		Instant end1 = Instant.now();
-		
-		System.out.println("Size: " + resultSize + "; " +ID + "; Time exact: " + Duration.between(start, end).toMillis()
-				+ "; Time heuristic: " + Duration.between(start1, end1).toMillis() + "; rel.mis: " + (exact.getTotalPrice() - heuristic.getTotalPrice())/exact.getTotalPrice());
-		*/
 	}
 
 	public static void readFiles(File node) {
@@ -129,7 +73,7 @@ public class BackPack {
 
 	public static void readFileAndSolve(File file) {
 		BufferedReader br = null;
-
+		
 		try {
 			String line;
 			br = new BufferedReader(new FileReader(file));
@@ -150,4 +94,14 @@ public class BackPack {
 		}
 	}
 
+	
+	private class times{
+		private double odchylka;
+		private int cas;
+		
+		times(double odchylka, int cas){
+			this.odchylka = odchylka;
+			this.cas = cas;
+		}
+	}
 }
