@@ -18,7 +18,6 @@ public class Solver {
 	private double epsilon;
 	private ArrayList<Item> items;
 	private ArrayList<Integer> content;
-	private int teplotaTuhnuti;
 	private double koeficientOchlazeni;
 	private double pocatecniTeplota;
 	private double minimalniTeplota;
@@ -295,9 +294,22 @@ public class Solver {
 			i = 0;
 			while(equilibrum(i)) {
 				i++;
-				state = getNewState(state, aktualniTeplota);
+				
+                novyStav = getNextState(aktualniStav, polozky);
+
+                batoh.clear();
+                /* naplnime batoh */
+                fillBatoh(polozky, novyStav);
+                /* mrkneme kolik se podarilo ukradnout a pokud je to nejlepsi vysledek, tak ulozime */
+                aktualniCena = this.batoh.getAktualniCena();
+                if ( isBetter(aktualniCena) ) {
+                    // System.out.println("Nasli jsme lepsi reseni s cenou " + aktualniCena + " a vahou " + this.batoh.getAktualniZatizeni());
+                    this.bestCena = aktualniCena;
+                    this.bestCenaVaha = this.batoh.getAktualniZatizeni();
+                    this.bestPolozky = this.batoh.getPolozky();
+                }
 			}
-			aktualniTeplota = coolDown(aktualniTeplota);
+			aktualniTeplota = zchladit(aktualniTeplota);
 		} 
 		
 		
@@ -323,7 +335,7 @@ public class Solver {
 	    return aktualniTeplota < this.minimalniTeplota;
 	}
 
-	private double coolDown(double aktualniTeplota) {
+	private double zchladit(double aktualniTeplota) {
 		 return (aktualniTeplota * this.koeficientOchlazeni);
 	}
 
