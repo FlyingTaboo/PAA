@@ -280,7 +280,7 @@ public class Solver {
 	public Result findCoolingResult(){
 		Instant start = Instant.now();
 		Result result = new Result(ID, size, capacity);
-		double aktualniTeplota = (this.pocatecniTeplota * this.capacity) / Math.log(2);
+		double aktualniTeplota = this.pocatecniTeplota;
 		int aktualniCena = 0;
 		int bestCena = 0;
 		int bestCenaVaha = 0;
@@ -299,21 +299,25 @@ public class Solver {
 		for(int j=aktualni.size(); j<size; j++){
 			aktualni.add(0);
 		}
-		
-		while( !isFrozen(aktualniTeplota)){
+		boolean endA = false;
+		while(!endA&& !isFrozen(aktualniTeplota)){
 			i = 0;
+			endA = true;
 			while(equilibrum(i)) {
 				i++;
 				expandovano++; 
-				novy = generateNextState(aktualni);
+				novy = generateNextState(aktualni, aktualniTeplota);
                 aktualniCena = getPriceOfContent(novy);
+                if (!novy.equals(aktualni)) {
+                	endA = false;
+                }
                 if (aktualniCena > bestCena ) {
                     bestCena = aktualniCena;
                     bestCenaVaha = getWeightOfContent(novy);
                     content = novy;
-                    //System.out.println("added new result" + content + getPriceOfContent(content) + " " + getWeightOfContent(content));
-                    result.addResult(content, getPriceOfContent(content), getWeightOfContent(content));
+                    result.addResult(content, bestCena, bestCenaVaha);
                 }
+                aktualni = novy;
 			}
 			aktualniTeplota = zchladit(aktualniTeplota);
 		} 
@@ -323,7 +327,7 @@ public class Solver {
 		return result;
 	}
 	
-	private ArrayList<Integer> generateNextState(ArrayList<Integer> aktualni) {
+	private ArrayList<Integer> generateNextState(ArrayList<Integer> aktualni, double temp) {
         int cena1 = getPriceOfContent(aktualni);
 
         ArrayList<Integer> novy = getRandomState(aktualni);
@@ -336,24 +340,19 @@ public class Solver {
             int delta = cena2 - cena1;
             Random randomObj = new Random();
             double x = randomObj.nextDouble();
-            return ( x < Math.exp(-delta / this.koeficientOchlazeni) ) ? novy : aktualni;
+            return ( x < Math.exp(delta / temp) ) ? novy : aktualni;
         }
     }
 
 	private ArrayList<Integer> getRandomState(ArrayList<Integer> aktualni) {
-		ArrayList<Integer> novy = (ArrayList<Integer>) aktualni.clone();
-		
-        Random index = new Random();
-        int random = index.nextInt(novy.size());
-        novy.set(random, novy.get(random) == 0 ? 1 : 0);
-        for(int i=novy.size()-1; i>=0; i--){
-        	if(getWeightOfContent(novy)>capacity){
-        		novy.set(i, 0);
-        	}else{
-        		break;
-        	}
-        }
-        //System.out.println(novy);
+		ArrayList<Integer> novy;
+		do{
+			novy = (ArrayList<Integer>) aktualni.clone();
+			Random index = new Random();
+			int random = index.nextInt(novy.size());
+			int pred = novy.get(random);
+			novy.set(random, novy.get(random) == 0 ? 1 : 0);
+		}while(getWeightOfContent(novy)>capacity);
         return novy;
 	}
 

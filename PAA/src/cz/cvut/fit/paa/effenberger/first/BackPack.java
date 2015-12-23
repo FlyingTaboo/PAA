@@ -18,7 +18,7 @@ public class BackPack {
 		}
 	}
 
-	public static void solveProblem(String line) {
+	public static void solveProblem(String line, double pocatecniTeplota, double koeficientOchlazeni, double minimalniTeplota, double koeficientEquilibrum) {
 		String[] lineArray = line.split(" ");
 		int ID = Integer.parseInt(lineArray[0]);
 		int resultSize = Integer.parseInt(lineArray[1]);
@@ -39,10 +39,7 @@ public class BackPack {
 		
 		Result resultSC = null;
 		Solver solverSC = new Solver(ID, resultSize, max_weight, items, 0.0);
-		double pocatecniTeplota = 500;
-		double koeficientOchlazeni = 0.85;
-		double minimalniTeplota = 1;
-		double koeficientEquilibrum = 2;
+
 		
 		Instant startSC = Instant.now();
 		solverSC.setCoolingAttributes(pocatecniTeplota, koeficientOchlazeni, minimalniTeplota, koeficientEquilibrum);
@@ -51,10 +48,11 @@ public class BackPack {
 		Instant endSC = Instant.now();
 			
 		String out = resultSize + ";\t" + ID + ";\t";
-		out+= (resultDynamic.getTotalPrice() - resultSC.getTotalPrice())/resultDynamic.getTotalPrice() + ";\t";
 		//out += resultDynamic.getTotalPrice() + " vs " + resultSC.getTotalPrice() + ";\t";
 		out += Duration.between(startSC, endSC).toMillis() + ";\t";
-		out += resultSC.getExpandovano();
+		//out += resultSC.getExpandovano();
+		out += pocatecniTeplota + ";\t" + koeficientOchlazeni+ ";\t" + minimalniTeplota+ ";\t" + koeficientEquilibrum+ ";\t";
+		out+= (resultDynamic.getTotalPrice() - resultSC.getTotalPrice())/resultDynamic.getTotalPrice() + ";\t";
 		
 		
 		System.out.println(out);
@@ -78,7 +76,7 @@ public class BackPack {
 			String line;
 			br = new BufferedReader(new FileReader(file));
 			while ((line = br.readLine()) != null) {
-				solveProblem(line);
+				solveOneProblem(line);
 				//break;
 			}
 
@@ -94,6 +92,33 @@ public class BackPack {
 		}
 	}
 
+	private static void solveOneProblem(String line){
+		double pocatecniTeplota = 500;
+		double koeficientOchlazeni = 0.90;
+		double minimalniTeplota = 1;
+		double koeficientEquilibrum = 0.5;
+		
+		double[] pocTeploty = new double[]{100, 200, 300, 400, 500, 600, 700, 800, 900, 1000};
+		for (int i=0; i<pocTeploty.length; i++){
+			//solveProblem(line, pocTeploty[i], koeficientOchlazeni, minimalniTeplota, koeficientEquilibrum);
+		}
+		
+		double[] koefOchl = new double[]{0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.9, 0.95, 0.99};
+		for (int i=0; i<pocTeploty.length; i++){
+			//solveProblem(line, pocatecniTeplota, koefOchl[i], minimalniTeplota, koeficientEquilibrum);
+		}
+		
+		double[] minTepl = new double[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+		for (int i=0; i<pocTeploty.length; i++){
+			solveProblem(line, pocatecniTeplota, koeficientOchlazeni, minTepl[i], koeficientEquilibrum);
+		}
+		
+		double[] koefEq = new double[]{0.1, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5};
+		for (int i=0; i<pocTeploty.length; i++){
+			//solveProblem(line, pocatecniTeplota, koeficientOchlazeni, minimalniTeplota, koefEq[i]);
+		}
+		
+	}
 	
 	private class times{
 		private double odchylka;
