@@ -9,8 +9,9 @@ public class Solver {
 		this.problem = p;
 	}
 
-	public Result findExactResult() {
+	public int findExactResult() {
 		boolean[] array = new boolean[this.problem.getSize()];
+		int best = 0;
 		for (int i = 0; i < Math.pow(2, this.problem.getSize()); i++) {
 			String bites = Integer.toBinaryString(i);
 			bites = fillZeros(bites, this.problem.getSize());
@@ -23,13 +24,13 @@ public class Solver {
 				}
 			}
 			this.problem.setValues(array);
-			if (this.problem.getPrice() != 0) {
-				System.out.println(this.problem.getPrice());
-				System.out.println(bites);
+			int solution = this.problem.getPrice();
+			if (solution > best) {
+				best = solution;
 			}
 
 		}
-		return null;
+		return best;
 	}
 
 	private String fillZeros(String input, int lenght) {

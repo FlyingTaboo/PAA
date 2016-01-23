@@ -11,7 +11,7 @@ public class BackPack {
 	private static ArrayList<Problem> problems = new ArrayList<Problem>();
 
 	public static void main(String[] args) throws Exception {
-		readFiles(new File("./data/dat/20/uf20-01.3sat"));
+		readFiles(new File("./data/dat/75/uf75-01.3sat"));
 		for (int i = 0; i < files.size(); i++) {
 			readFileAndSolve(files.get(i));
 		}
@@ -83,8 +83,8 @@ public class BackPack {
 			Problem p = new Problem(formulas, file.getName(), size);
 			p.setPrices(getPrice(array));
 			Solver s = new Solver(size, p);
-			s.findExactResult();
-			System.out.println(p.toString());
+			int solution = s.findExactResult();
+			System.out.println( file.getName() + ": " + solution);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
