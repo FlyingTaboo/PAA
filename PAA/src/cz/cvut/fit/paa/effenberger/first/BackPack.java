@@ -11,7 +11,7 @@ public class BackPack {
 	private static ArrayList<Problem> problems = new ArrayList<Problem>();
 
 	public static void main(String[] args) throws Exception {
-		readFiles(new File("C:\\Users\\Jeff\\git\\PAA\\PAA\\data\\dat\\20\\uf20-01.3sat"));
+		readFiles(new File("./data/dat/20/uf20-01.3sat"));
 		for (int i = 0; i < files.size(); i++) {
 			readFileAndSolve(files.get(i));
 		}
@@ -80,8 +80,8 @@ public class BackPack {
 			}
 			line = br.readLine();
 			array = line.split(" ");
-			addPrice(array, formulas);
 			Problem p = new Problem(formulas, file.getName(), size);
+			p.setPrices(getPrice(array));
 			Solver s = new Solver(size, p);
 			s.findExactResult();
 			System.out.println(p.toString());
@@ -98,20 +98,12 @@ public class BackPack {
 		}
 	}
 
-	private static void addPrice(String[] array, ArrayList<Formula> formulas) {
-		for (Formula f : formulas) {
-			int o = f.getFirstVar().getOrder() - 1;
-			int price = Integer.parseInt(array[o]);
-			f.getFirstVar().setPrice(price);
-
-			o = f.getSecondVar().getOrder() - 1;
-			price = Integer.parseInt(array[o]);
-			f.getSecondVar().setPrice(price);
-
-			o = f.getThirdVar().getOrder() - 1;
-			price = Integer.parseInt(array[o]);
-			f.getThirdVar().setPrice(price);
+	private static int[] getPrice(String[] array) {
+		int[] result = new int[array.length]; 
+		for (int i=0;i<array.length;i++) {
+			result[i] = Integer.parseInt(array[i]);
 		}
+		return result;
 
 	}
 

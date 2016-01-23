@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class Problem {
 	private ArrayList<Formula> formulas;
 	private boolean[] input;
+	private int prices[];
 	private boolean isSet = false;
 	private String ID;
 	private int size;
@@ -19,16 +20,13 @@ public class Problem {
 		if (!this.isSet) {
 			return -1;
 		}
-		int result = 0;
 		for (int i = 0; i < this.formulas.size(); i++) {
 			Formula akt = this.formulas.get(i);
-			if (akt.isSatisfied(this.input)) {
-				result += akt.getTotalPrice(this.input);
-			} else {
+			if (!akt.isSatisfied(this.input)) {
 				return 0;
 			}
 		}
-		return result;
+		return getTotalPrice();
 	}
 
 	public void setValues(boolean[] input) {
@@ -57,4 +55,22 @@ public class Problem {
 	public int getSize() {
 		return this.size;
 	}
+
+	public int[] getPrices() {
+		return prices;
+	}
+
+	public void setPrices(int[] prices) {
+		this.prices = prices;
+	}
+	public int getTotalPrice(){
+		int result = 0;
+		for(int i=0; i<input.length;i++){
+			if (input[i]){
+				result+=prices[i];
+			}
+		}
+		return result;
+	}
+	
 }

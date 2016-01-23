@@ -1,5 +1,7 @@
 package cz.cvut.fit.paa.effenberger.first;
 
+import java.util.Arrays;
+
 public class Solver {
 	private Problem problem;
 
@@ -12,7 +14,7 @@ public class Solver {
 		for (int i = 0; i < Math.pow(2, this.problem.getSize()); i++) {
 			String bites = Integer.toBinaryString(i);
 			bites = fillZeros(bites, this.problem.getSize());
-			// System.out.println(bites);
+			//System.out.println(bites);
 			for (int j = 0; j < this.problem.getSize(); j++) {
 				if (bites.charAt(j) == '1') {
 					array[j] = true;
@@ -23,6 +25,7 @@ public class Solver {
 			this.problem.setValues(array);
 			if (this.problem.getPrice() != 0) {
 				System.out.println(this.problem.getPrice());
+				System.out.println(bites);
 			}
 
 		}
