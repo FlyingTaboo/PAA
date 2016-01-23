@@ -56,21 +56,18 @@ public class Problem {
 		return this.size;
 	}
 
-	public int[] getPrices() {
-		return prices;
-	}
-
 	public void setPrices(int[] prices) {
 		this.prices = prices;
 	}
-	public int getTotalPrice(){
+
+	private int getTotalPrice() {
 		int result = 0;
-		for(int i=0; i<input.length;i++){
-			if (input[i]){
-				result+=prices[i];
+		for (int i = 0; i < this.input.length; i++) {
+			if (this.input[i]) {
+				result += this.prices[i];
 			}
 		}
 		return result;
 	}
-	
+
 }
