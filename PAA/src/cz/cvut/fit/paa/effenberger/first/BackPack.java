@@ -19,7 +19,7 @@ public class BackPack {
 	}
 
 	public static void solveProblem(Problem problem, double pocatecniTeplota, double koeficientOchlazeni,
-			double minimalniTeplota, double koeficientEquilibrum) {
+			double minimalniTeplota, double koeficientEquilibrum, double koeficientRelaxace) {
 		/*
 		 * int ID = Integer.parseInt(lineArray[0]); int resultSize =
 		 * Integer.parseInt(lineArray[1]); int max_weight =
@@ -83,10 +83,10 @@ public class BackPack {
 			Problem p = new Problem(formulas, file.getName(), size);
 			p.setPrices(getPrice(array));
 			Solver s = new Solver(size, p);
-			int solution = s.findExactResult();
+			double solution = s.findExactResult();
 			System.out.println(file.getName() + ": " + solution);
 			new Solver(size, p);
-			solution = s.findCoolingResult(500, 0.9, 1, 0.5);
+			solution = s.findCoolingResult(800, 0.98, 1, 0.8, 0.93);
 			System.out.println(file.getName() + ": " + solution);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -119,33 +119,40 @@ public class BackPack {
 		double koeficientOchlazeni = 0.90;
 		double minimalniTeplota = 1;
 		double koeficientEquilibrum = 0.5;
-
+		double koeficientRelaxace = 0.95;
 		double[] pocTeploty = new double[] { 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000 };
 		for (int i = 0; i < pocTeploty.length; i++) {
-			solveProblem(pocTeploty[i], koeficientOchlazeni, minimalniTeplota, koeficientEquilibrum);
+			solveProblem(pocTeploty[i], koeficientOchlazeni, minimalniTeplota, koeficientEquilibrum,
+					koeficientRelaxace);
 		}
 
 		double[] koefOchl = new double[] { 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.9, 0.95, 0.99 };
 		for (int i = 0; i < pocTeploty.length; i++) {
-			solveProblem(pocatecniTeplota, koefOchl[i], minimalniTeplota, koeficientEquilibrum);
+			solveProblem(pocatecniTeplota, koefOchl[i], minimalniTeplota, koeficientEquilibrum, koeficientRelaxace);
 		}
 
 		double[] minTepl = new double[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 		for (int i = 0; i < pocTeploty.length; i++) {
-			solveProblem(pocatecniTeplota, koeficientOchlazeni, minTepl[i], koeficientEquilibrum);
+			solveProblem(pocatecniTeplota, koeficientOchlazeni, minTepl[i], koeficientEquilibrum, koeficientRelaxace);
 		}
 
 		double[] koefEq = new double[] { 0.1, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5 };
 		for (int i = 0; i < pocTeploty.length; i++) {
-			solveProblem(pocatecniTeplota, koeficientOchlazeni, minimalniTeplota, koefEq[i]);
+			solveProblem(pocatecniTeplota, koeficientOchlazeni, minimalniTeplota, koefEq[i], koeficientRelaxace);
+		}
+
+		double[] koefRelax = new double[] { 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.9, 0.95, 0.99 };
+		for (int i = 0; i < pocTeploty.length; i++) {
+			solveProblem(pocatecniTeplota, koeficientOchlazeni, minimalniTeplota, koeficientEquilibrum, koefRelax[i]);
 		}
 
 	}
 
 	private static void solveProblem(double pocatecniTeplota, double koeficientOchlazeni, double minimalniTeplota,
-			double koeficientEquilibrum) {
+			double koeficientEquilibrum, double koeficientRelaxace) {
 		for (Problem problem : problems) {
-			solveProblem(problem, pocatecniTeplota, koeficientOchlazeni, minimalniTeplota, koeficientEquilibrum);
+			solveProblem(problem, pocatecniTeplota, koeficientOchlazeni, minimalniTeplota, koeficientEquilibrum,
+					koeficientRelaxace);
 		}
 
 	}

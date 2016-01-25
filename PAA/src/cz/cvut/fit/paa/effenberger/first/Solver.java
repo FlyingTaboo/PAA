@@ -1,6 +1,5 @@
 package cz.cvut.fit.paa.effenberger.first;
 
-import java.time.Instant;
 import java.util.Random;
 
 public class Solver {
@@ -10,6 +9,7 @@ public class Solver {
 	private double minimalniTeplota;
 	private double koeficientEquilibrum;
 	private int size;
+	private double relaxCoef;
 
 	public Solver(int size, Problem p) {
 		this.problem = p;
@@ -34,6 +34,7 @@ public class Solver {
 			int solution = this.problem.getPrice();
 			if (solution > best) {
 				best = solution;
+				// printBoolArr(array);
 			}
 
 		}
@@ -49,16 +50,16 @@ public class Solver {
 		return sb.toString();
 	}
 
-	public int findCoolingResult(double pocatecniTeplota, double koeficientOchlazeni, double minimalniTeplota,
-			double koeficientEquilibrum) {
+	public double findCoolingResult(double pocatecniTeplota, double koeficientOchlazeni, double minimalniTeplota,
+			double koeficientEquilibrum, double relaxCoef) {
 		this.pocatecniTeplota = pocatecniTeplota;
 		this.koeficientOchlazeni = koeficientOchlazeni;
 		this.minimalniTeplota = minimalniTeplota;
 		this.koeficientEquilibrum = koeficientEquilibrum;
-
+		this.relaxCoef = relaxCoef;
 		double aktualniTeplota = this.pocatecniTeplota;
-		int aktualniCena = 0;
-		int bestCena = 0;
+		double aktualniCena = 0;
+		double bestCena = 0;
 		int i = 0;
 		boolean[] novy = new boolean[this.size];
 		boolean[] aktualni = new boolean[this.size];
@@ -71,6 +72,7 @@ public class Solver {
 			while (equilibrum(i)) {
 				i++;
 				novy = generateNextState(aktualni, aktualniTeplota);
+				printBoolArr(novy);
 				aktualniCena = getPriceOfContent(novy);
 				if (!novy.equals(aktualni)) {
 					endA = false;
@@ -82,44 +84,49 @@ public class Solver {
 			}
 			aktualniTeplota = zchladit(aktualniTeplota);
 		}
-		Instant.now();
 		return bestCena;
 	}
 
 	private boolean[] generateNextState(boolean[] aktualni, double temp) {
-		int cena1 = getPriceOfContent(aktualni);
+		double cena1 = getPriceOfContent(aktualni);
 
 		boolean[] novy = getRandomState(aktualni);
-		int cena2 = getPriceOfContent(novy);
+		double cena2 = getPriceOfContent(novy);
 
 		if (cena2 > cena1) {
 			return novy;
 		} else {
-			int delta = cena2 - cena1;
+			double delta = cena2 - cena1;
 			Random randomObj = new Random();
 			double x = randomObj.nextDouble();
 			return (x < Math.exp(delta / temp)) ? novy : aktualni;
 		}
 	}
 
-	private int getPriceOfContent(boolean[] aktualni) {
+	private double getPriceOfContent(boolean[] aktualni) {
 		this.problem.setValues(aktualni);
-		return this.problem.getPrice();
+		return this.problem.getRelaxedPrice();
 
 	}
 
 	private boolean[] getRandomState(boolean[] aktualni) {
-		return generateInitState(aktualni);
-		// ArrayList<Integer> novy;
-		// do {
-		// novy = (ArrayList<Integer>) aktualni.clone();
-		// Random index = new Random();
-		// int random = index.nextInt(novy.size());
-		// novy.get(random);
-		// novy.set(random, novy.get(random) == 0 ? 1 : 0);
-		// } while (getWeightOfContent(novy) > this.capacity);
-		// return novy;
-		// return aktualni; // TODO
+		boolean[] novy;
+		do {
+			novy = aktualni.clone();
+			Random index = new Random();
+			int random = index.nextInt(novy.length);
+			novy[random] = !novy[random];
+		} while (!isAcceptable(novy));
+		return novy;
+	}
+
+	private boolean isAcceptable(boolean[] novy) {
+		this.problem.setValues(novy);
+		if (this.problem.getSatisfiedCount() > (this.relaxCoef * this.problem.getAllCount())) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	private boolean[] generateInitState(boolean[] aktualni) {
@@ -141,4 +148,33 @@ public class Solver {
 	private boolean equilibrum(int i) {
 		return (i < (this.koeficientEquilibrum * this.size));
 	}
+
+	private void printBoolArr(boolean[] array) {
+		if (array != null) {
+			for (int i = 0; i < array.length; i++) {
+				System.out.print(array[i] ? "1" : "0");
+			}
+			System.out.print("\n");
+		}
+	}
 }
+
+/*
+ * Vygeneruj první náhodný stav (zcela náhodný) Vygeneruj náhodný stav odlišní
+ * od předchozího v jednom bodu (pokud se projdou všechny ohodnocení, co pak?)
+ * Přijmi z generování řešení, které má buď vyšší ohodnocení nebo má více
+ * splněných formulí cena řešení je počítáná jak bylo popsaáno (vše splněno =
+ * x2), (nesplněno = * procenta) Přijmi jako řešení takové řešení, které splňuje
+ * původní podmínky (ohledně ceny)
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */

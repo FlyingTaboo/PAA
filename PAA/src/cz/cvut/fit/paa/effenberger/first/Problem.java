@@ -20,12 +20,6 @@ public class Problem {
 		if (!this.isSet) {
 			return -1;
 		}
-		for (int i = 0; i < this.formulas.size(); i++) {
-			Formula akt = this.formulas.get(i);
-			if (!akt.isSatisfied(this.input)) {
-				return 0;
-			}
-		}
 		return getTotalPrice();
 	}
 
@@ -68,6 +62,34 @@ public class Problem {
 			}
 		}
 		return result;
+	}
+
+	public int getSatisfiedCount() {
+		int result = 0;
+		for (int i = 0; i < this.formulas.size(); i++) {
+			Formula akt = this.formulas.get(i);
+			if (akt.isSatisfied(this.input)) {
+				result++;
+			}
+		}
+		System.out.println("++++++++ result" + result);
+		return result;
+	}
+
+	public double getRelaxedPrice() {
+		int result = getTotalPrice();
+		int sats = getSatisfiedCount();
+		int allCount = getAllCount();
+
+		if (sats == allCount) {
+			return result * 2;
+		} else {
+			return (result * 1.0) * (allCount * 1.0 / sats * 1.0);
+		}
+	}
+
+	public int getAllCount() {
+		return this.formulas.size();
 	}
 
 }
