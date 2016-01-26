@@ -9,11 +9,16 @@ public class Problem {
 	private boolean isSet = false;
 	private String ID;
 	private int size;
+	private double relaxCoef;
 
 	Problem(ArrayList<Formula> formulas, String string, int size) {
 		this.formulas = formulas;
 		this.ID = string;
 		this.size = size;
+	}
+
+	public void setRelaxCoef(double relaxCoef) {
+		this.relaxCoef = relaxCoef;
 	}
 
 	public int getPrice() {
@@ -72,7 +77,7 @@ public class Problem {
 				result++;
 			}
 		}
-		System.out.println("++++++++ result" + result);
+		// System.out.println("++++++++ result" + result);
 		return result;
 	}
 
@@ -84,7 +89,7 @@ public class Problem {
 		if (sats == allCount) {
 			return result * 2;
 		} else {
-			return (result * 1.0) * (allCount * 1.0 / sats * 1.0);
+			return (result * 1.0) * (allCount * 1.0 / sats * 1.0) * this.relaxCoef;
 		}
 	}
 

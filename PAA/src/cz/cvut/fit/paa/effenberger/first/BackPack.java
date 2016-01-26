@@ -11,7 +11,7 @@ public class BackPack {
 	private static ArrayList<Problem> problems = new ArrayList<Problem>();
 
 	public static void main(String[] args) throws Exception {
-		readFiles(new File("./data/dat/20/uf20-01.3sat"));
+		readFiles(new File("./data/dat/75/uf75-015.3sat"));
 		for (int i = 0; i < files.size(); i++) {
 			readFileAndSolve(files.get(i));
 		}
@@ -20,6 +20,27 @@ public class BackPack {
 
 	public static void solveProblem(Problem problem, double pocatecniTeplota, double koeficientOchlazeni,
 			double minimalniTeplota, double koeficientEquilibrum, double koeficientRelaxace) {
+		Solver s = new Solver(75, problem);
+		new Solver(75, problem);
+		double solution = 0;
+		long start = System.currentTimeMillis();
+		int repeat = 1;
+		for (int i = 0; i < repeat; i++) {
+			solution += s.findCoolingResult(pocatecniTeplota, koeficientOchlazeni, minimalniTeplota,
+					koeficientEquilibrum, koeficientRelaxace);
+		}
+		long end = System.currentTimeMillis();
+		StringBuilder sb = new StringBuilder();
+		sb.append(problem.getId()).append("\t");
+		sb.append(problem.getSatisfiedCount()).append("/").append(problem.getAllCount()).append("\t\t");
+		sb.append(solution / repeat).append("\t\t");
+		sb.append(end - start).append("\t");
+		sb.append(pocatecniTeplota).append("\t");
+		sb.append(koeficientOchlazeni).append("\t");
+		sb.append(minimalniTeplota).append("\t");
+		sb.append(koeficientEquilibrum).append("\t");
+		sb.append(koeficientRelaxace).append("\t");
+		System.out.println(sb.toString());
 		/*
 		 * int ID = Integer.parseInt(lineArray[0]); int resultSize =
 		 * Integer.parseInt(lineArray[1]); int max_weight =
@@ -82,12 +103,7 @@ public class BackPack {
 			array = line.split(" ");
 			Problem p = new Problem(formulas, file.getName(), size);
 			p.setPrices(getPrice(array));
-			Solver s = new Solver(size, p);
-			double solution = s.findExactResult();
-			System.out.println(file.getName() + ": " + solution);
-			new Solver(size, p);
-			solution = s.findCoolingResult(800, 0.98, 1, 0.8, 0.93);
-			System.out.println(file.getName() + ": " + solution);
+			problems.add(p);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -127,22 +143,22 @@ public class BackPack {
 		}
 
 		double[] koefOchl = new double[] { 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.9, 0.95, 0.99 };
-		for (int i = 0; i < pocTeploty.length; i++) {
+		for (int i = 0; i < koefOchl.length; i++) {
 			solveProblem(pocatecniTeplota, koefOchl[i], minimalniTeplota, koeficientEquilibrum, koeficientRelaxace);
 		}
 
-		double[] minTepl = new double[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-		for (int i = 0; i < pocTeploty.length; i++) {
+		double[] minTepl = new double[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0.1 };
+		for (int i = 0; i < minTepl.length; i++) {
 			solveProblem(pocatecniTeplota, koeficientOchlazeni, minTepl[i], koeficientEquilibrum, koeficientRelaxace);
 		}
 
 		double[] koefEq = new double[] { 0.1, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5 };
-		for (int i = 0; i < pocTeploty.length; i++) {
+		for (int i = 0; i < koefEq.length; i++) {
 			solveProblem(pocatecniTeplota, koeficientOchlazeni, minimalniTeplota, koefEq[i], koeficientRelaxace);
 		}
 
 		double[] koefRelax = new double[] { 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.9, 0.95, 0.99 };
-		for (int i = 0; i < pocTeploty.length; i++) {
+		for (int i = 0; i < koefRelax.length; i++) {
 			solveProblem(pocatecniTeplota, koeficientOchlazeni, minimalniTeplota, koeficientEquilibrum, koefRelax[i]);
 		}
 

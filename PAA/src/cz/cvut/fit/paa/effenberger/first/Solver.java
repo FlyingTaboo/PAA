@@ -9,7 +9,6 @@ public class Solver {
 	private double minimalniTeplota;
 	private double koeficientEquilibrum;
 	private int size;
-	private double relaxCoef;
 
 	public Solver(int size, Problem p) {
 		this.problem = p;
@@ -31,10 +30,12 @@ public class Solver {
 				}
 			}
 			this.problem.setValues(array);
-			int solution = this.problem.getPrice();
-			if (solution > best) {
-				best = solution;
-				// printBoolArr(array);
+			if (this.problem.getSatisfiedCount() == this.problem.getAllCount()) {
+				int solution = this.problem.getPrice();
+				if (solution > best) {
+					best = solution;
+					// printBoolArr(array);
+				}
 			}
 
 		}
@@ -56,7 +57,8 @@ public class Solver {
 		this.koeficientOchlazeni = koeficientOchlazeni;
 		this.minimalniTeplota = minimalniTeplota;
 		this.koeficientEquilibrum = koeficientEquilibrum;
-		this.relaxCoef = relaxCoef;
+		this.problem.setRelaxCoef(relaxCoef);
+
 		double aktualniTeplota = this.pocatecniTeplota;
 		double aktualniCena = 0;
 		double bestCena = 0;
@@ -79,12 +81,15 @@ public class Solver {
 				}
 				if (aktualniCena > bestCena) {
 					bestCena = aktualniCena;
+					novy.clone();
 				}
 				aktualni = novy;
 			}
 			aktualniTeplota = zchladit(aktualniTeplota);
 		}
-		return bestCena;
+		this.problem.setValues(novy);
+
+		return this.problem.getRelaxedPrice();
 	}
 
 	private boolean[] generateNextState(boolean[] aktualni, double temp) {
@@ -93,7 +98,7 @@ public class Solver {
 		boolean[] novy = getRandomState(aktualni);
 		double cena2 = getPriceOfContent(novy);
 
-		if (cena2 > cena1) {
+		if (isNewBetter(novy, aktualni)) {
 			return novy;
 		} else {
 			double delta = cena2 - cena1;
@@ -101,6 +106,22 @@ public class Solver {
 			double x = randomObj.nextDouble();
 			return (x < Math.exp(delta / temp)) ? novy : aktualni;
 		}
+	}
+
+	private boolean isNewBetter(boolean[] novy, boolean[] aktualni) {
+		this.problem.setValues(novy);
+		int novyCountSat = this.problem.getSatisfiedCount();
+		double novyPrice = this.problem.getRelaxedPrice();
+		this.problem.setValues(aktualni);
+		int aktualniCount = this.problem.getSatisfiedCount();
+		double aktualniPrice = this.problem.getRelaxedPrice();
+		if (novyCountSat > aktualniCount) {
+			return true;
+		}
+		if (novyCountSat == aktualniCount && novyPrice > aktualniPrice) {
+			return true;
+		}
+		return false;
 	}
 
 	private double getPriceOfContent(boolean[] aktualni) {
@@ -111,22 +132,11 @@ public class Solver {
 
 	private boolean[] getRandomState(boolean[] aktualni) {
 		boolean[] novy;
-		do {
-			novy = aktualni.clone();
-			Random index = new Random();
-			int random = index.nextInt(novy.length);
-			novy[random] = !novy[random];
-		} while (!isAcceptable(novy));
+		novy = aktualni.clone();
+		Random index = new Random();
+		int random = index.nextInt(novy.length);
+		novy[random] = !novy[random];
 		return novy;
-	}
-
-	private boolean isAcceptable(boolean[] novy) {
-		this.problem.setValues(novy);
-		if (this.problem.getSatisfiedCount() > (this.relaxCoef * this.problem.getAllCount())) {
-			return true;
-		} else {
-			return false;
-		}
 	}
 
 	private boolean[] generateInitState(boolean[] aktualni) {
@@ -152,9 +162,9 @@ public class Solver {
 	private void printBoolArr(boolean[] array) {
 		if (array != null) {
 			for (int i = 0; i < array.length; i++) {
-				System.out.print(array[i] ? "1" : "0");
+				// System.out.print(array[i] ? "1" : "0");
 			}
-			System.out.print("\n");
+			// System.out.print("\n");
 		}
 	}
 }
