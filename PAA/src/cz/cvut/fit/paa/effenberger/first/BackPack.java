@@ -103,7 +103,9 @@ public class BackPack {
 			array = line.split(" ");
 			Problem p = new Problem(formulas, file.getName(), size);
 			p.setPrices(getPrice(array));
+			
 			problems.add(p);
+			//solveProblem(500, 0.90, 1, 0.5, 0.95);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -147,7 +149,7 @@ public class BackPack {
 			solveProblem(pocatecniTeplota, koefOchl[i], minimalniTeplota, koeficientEquilibrum, koeficientRelaxace);
 		}
 
-		double[] minTepl = new double[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0.1 };
+		double[] minTepl = new double[] {0.01, 0.1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0.1 };
 		for (int i = 0; i < minTepl.length; i++) {
 			solveProblem(pocatecniTeplota, koeficientOchlazeni, minTepl[i], koeficientEquilibrum, koeficientRelaxace);
 		}

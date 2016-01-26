@@ -67,21 +67,19 @@ public class Solver {
 		boolean[] aktualni = new boolean[this.size];
 		aktualni = generateInitState(aktualni);
 
-		boolean endA = false;
-		while (!endA && !isFrozen(aktualniTeplota)) {
+		while (!isFrozen(aktualniTeplota)) {
 			i = 0;
-			endA = true;
 			while (equilibrum(i)) {
 				i++;
 				novy = generateNextState(aktualni, aktualniTeplota);
 				printBoolArr(novy);
-				aktualniCena = getPriceOfContent(novy);
-				if (!novy.equals(aktualni)) {
-					endA = false;
-				}
+				aktualniCena = getAktSat(novy);
+				
+				//System.out.println(aktualniCena);
 				if (aktualniCena > bestCena) {
 					bestCena = aktualniCena;
 					novy.clone();
+					
 				}
 				aktualni = novy;
 			}
@@ -89,18 +87,25 @@ public class Solver {
 		}
 		this.problem.setValues(novy);
 
-		return this.problem.getRelaxedPrice();
+		return this.problem.getPrice();
+	}
+
+	private int getAktSat(boolean[] novy) {
+		this.problem.setValues(novy);
+		//System.out.println(this.problem.getSatisfiedCount());
+		return this.problem.getSatisfiedCount();
 	}
 
 	private boolean[] generateNextState(boolean[] aktualni, double temp) {
-		double cena1 = getPriceOfContent(aktualni);
+		double cena1 = getAktSat(aktualni);
 
 		boolean[] novy = getRandomState(aktualni);
-		double cena2 = getPriceOfContent(novy);
+		double cena2 = getAktSat(novy);
 
 		if (isNewBetter(novy, aktualni)) {
 			return novy;
 		} else {
+			
 			double delta = cena2 - cena1;
 			Random randomObj = new Random();
 			double x = randomObj.nextDouble();
@@ -126,6 +131,7 @@ public class Solver {
 
 	private double getPriceOfContent(boolean[] aktualni) {
 		this.problem.setValues(aktualni);
+		//System.out.println(this.problem.getSatisfiedCount());
 		return this.problem.getRelaxedPrice();
 
 	}
@@ -170,12 +176,12 @@ public class Solver {
 }
 
 /*
- * Vygeneruj první náhodný stav (zcela náhodný) Vygeneruj náhodný stav odlišní
- * od předchozího v jednom bodu (pokud se projdou všechny ohodnocení, co pak?)
- * Přijmi z generování řešení, které má buď vyšší ohodnocení nebo má více
- * splněných formulí cena řešení je počítáná jak bylo popsaáno (vše splněno =
- * x2), (nesplněno = * procenta) Přijmi jako řešení takové řešení, které splňuje
- * původní podmínky (ohledně ceny)
+ * Vygeneruj prvnĂ­ nĂˇhodnĂ˝ stav (zcela nĂˇhodnĂ˝) Vygeneruj nĂˇhodnĂ˝ stav odliĹˇnĂ­
+ * od pĹ™edchozĂ­ho v jednom bodu (pokud se projdou vĹˇechny ohodnocenĂ­, co pak?)
+ * PĹ™ijmi z generovĂˇnĂ­ Ĺ™eĹˇenĂ­, kterĂ© mĂˇ buÄŹ vyĹˇĹˇĂ­ ohodnocenĂ­ nebo mĂˇ vĂ­ce
+ * splnÄ›nĂ˝ch formulĂ­ cena Ĺ™eĹˇenĂ­ je poÄŤĂ­tĂˇnĂˇ jak bylo popsaĂˇno (vĹˇe splnÄ›no =
+ * x2), (nesplnÄ›no = * procenta) PĹ™ijmi jako Ĺ™eĹˇenĂ­ takovĂ© Ĺ™eĹˇenĂ­, kterĂ© splĹ�uje
+ * pĹŻvodnĂ­ podmĂ­nky (ohlednÄ› ceny)
  * 
  * 
  * 
