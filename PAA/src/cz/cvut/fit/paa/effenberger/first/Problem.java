@@ -87,9 +87,10 @@ public class Problem {
 		int allCount = getAllCount();
 
 		if (sats == allCount) {
-			return result * 2;
+			return result;
 		} else {
-			return (result * 1.0) * (allCount * 1.0 / sats * 1.0) * this.relaxCoef;
+			result -= (allCount - sats) * this.relaxCoef;
+			return result;
 		}
 	}
 

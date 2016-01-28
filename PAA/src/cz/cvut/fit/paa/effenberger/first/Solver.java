@@ -60,80 +60,59 @@ public class Solver {
 		this.problem.setRelaxCoef(relaxCoef);
 
 		double aktualniTeplota = this.pocatecniTeplota;
-		double aktualniCena = 0;
-		double bestCena = 0;
 		int i = 0;
 		boolean[] novy = new boolean[this.size];
 		boolean[] aktualni = new boolean[this.size];
+		boolean[] best = new boolean[this.size];
 		aktualni = generateInitState(aktualni);
-
-		while (!isFrozen(aktualniTeplota)) {
+		boolean term = false;
+		while (!term && !isFrozen(aktualniTeplota)) {
 			i = 0;
+			term = true;
 			while (equilibrum(i)) {
 				i++;
 				novy = generateNextState(aktualni, aktualniTeplota);
-				printBoolArr(novy);
-				aktualniCena = getAktSat(novy);
-				
-				//System.out.println(aktualniCena);
-				if (aktualniCena > bestCena) {
-					bestCena = aktualniCena;
-					novy.clone();
-					
+				if (!novy.equals(aktualni)) {
+					term = false;
+
+				}
+				// System.out.println(satCount(novy));
+				if (isSatisfied(novy) || getPrice(novy) > getPrice(best)) {
+					best = novy.clone();
 				}
 				aktualni = novy;
 			}
 			aktualniTeplota = zchladit(aktualniTeplota);
 		}
-		this.problem.setValues(novy);
+		this.problem.setValues(best);
 
 		return this.problem.getPrice();
 	}
 
-	private int getAktSat(boolean[] novy) {
+	private double getPrice(boolean[] novy) {
 		this.problem.setValues(novy);
-		//System.out.println(this.problem.getSatisfiedCount());
-		return this.problem.getSatisfiedCount();
+		return this.problem.getRelaxedPrice();
+	}
+
+	private boolean isSatisfied(boolean[] input) {
+		this.problem.setValues(input);
+		return (this.problem.getSatisfiedCount() == this.problem.getAllCount());
 	}
 
 	private boolean[] generateNextState(boolean[] aktualni, double temp) {
-		double cena1 = getAktSat(aktualni);
+		double cena1 = getPrice(aktualni);
 
 		boolean[] novy = getRandomState(aktualni);
-		double cena2 = getAktSat(novy);
-
-		if (isNewBetter(novy, aktualni)) {
+		double cena2 = getPrice(novy);
+		double delta = cena2 - cena1;
+		// System.out.println(delta);
+		if (delta > 0) {
 			return novy;
 		} else {
-			
-			double delta = cena2 - cena1;
 			Random randomObj = new Random();
 			double x = randomObj.nextDouble();
 			return (x < Math.exp(delta / temp)) ? novy : aktualni;
 		}
-	}
-
-	private boolean isNewBetter(boolean[] novy, boolean[] aktualni) {
-		this.problem.setValues(novy);
-		int novyCountSat = this.problem.getSatisfiedCount();
-		double novyPrice = this.problem.getRelaxedPrice();
-		this.problem.setValues(aktualni);
-		int aktualniCount = this.problem.getSatisfiedCount();
-		double aktualniPrice = this.problem.getRelaxedPrice();
-		if (novyCountSat > aktualniCount) {
-			return true;
-		}
-		if (novyCountSat == aktualniCount && novyPrice > aktualniPrice) {
-			return true;
-		}
-		return false;
-	}
-
-	private double getPriceOfContent(boolean[] aktualni) {
-		this.problem.setValues(aktualni);
-		//System.out.println(this.problem.getSatisfiedCount());
-		return this.problem.getRelaxedPrice();
-
 	}
 
 	private boolean[] getRandomState(boolean[] aktualni) {
@@ -164,33 +143,4 @@ public class Solver {
 	private boolean equilibrum(int i) {
 		return (i < (this.koeficientEquilibrum * this.size));
 	}
-
-	private void printBoolArr(boolean[] array) {
-		if (array != null) {
-			for (int i = 0; i < array.length; i++) {
-				// System.out.print(array[i] ? "1" : "0");
-			}
-			// System.out.print("\n");
-		}
-	}
 }
-
-/*
- * Vygeneruj prvnĂ­ nĂˇhodnĂ˝ stav (zcela nĂˇhodnĂ˝) Vygeneruj nĂˇhodnĂ˝ stav odliĹˇnĂ­
- * od pĹ™edchozĂ­ho v jednom bodu (pokud se projdou vĹˇechny ohodnocenĂ­, co pak?)
- * PĹ™ijmi z generovĂˇnĂ­ Ĺ™eĹˇenĂ­, kterĂ© mĂˇ buÄŹ vyĹˇĹˇĂ­ ohodnocenĂ­ nebo mĂˇ vĂ­ce
- * splnÄ›nĂ˝ch formulĂ­ cena Ĺ™eĹˇenĂ­ je poÄŤĂ­tĂˇnĂˇ jak bylo popsaĂˇno (vĹˇe splnÄ›no =
- * x2), (nesplnÄ›no = * procenta) PĹ™ijmi jako Ĺ™eĹˇenĂ­ takovĂ© Ĺ™eĹˇenĂ­, kterĂ© splĹ�uje
- * pĹŻvodnĂ­ podmĂ­nky (ohlednÄ› ceny)
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- * 
- */
